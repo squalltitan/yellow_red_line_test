@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>AR 藍球最小測試</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+
+  <!-- AR.js -->
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js"></script>
+
+  <style>
+    html, body {
+      margin: 0;
+      overflow: hidden;
+      font-family: "Microsoft JhengHei", Arial, sans-serif;
+      background: #000;
+    }
+
+    #panel {
+      position: fixed;
+      left: 10px;
+      right: 10px;
+      bottom: 12px;
+      z-index: 99999;
+      background: rgba(255,255,255,0.92);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 14px;
+      line-height: 1.5;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    }
+
+    button {
+      margin-top: 6px;
+      width: 100%;
+      padding: 9px;
+      border: none;
+      border-radius: 10px;
+      background: #1f6feb;
+      color: white;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    #togglePanelBtn {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      z-index: 100000;
+      width: 44px;
+      height: 44px;
+      line-height: 44px;
+      border-radius: 50%;
+      background: rgba(31,111,235,0.95);
+      color: white;
+      font-size: 22px;
+      font-weight: bold;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+      user-select: none;
+    }
+
+    #panel.collapsed {
+      transform: translateY(calc(100% - 38px));
+    }
+
+    #panel.collapsed .panelContent {
+      display: none;
+    }
+
+    #panel {
+      transition: transform 0.25s ease;
+    }
+
+    #panel.collapsed::before {
+      content: "AR 藍球測試｜點右上角展開";
+      display: block;
+      font-weight: bold;
+      color: #333;
+      font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="togglePanelBtn" onclick="togglePanel()">▼</div>
+
+  <div id="panel">
+    <div class="panelContent">
+      <b>AR 藍球最小測試</b><br>
+      狀態：<span id="status">頁面載入中</span><br>
+      說明：這一版不使用 GPS、不讀 GeoJSON，只測試 3D 藍球能不能疊在相機畫面上。<br>
+
+      <button onclick="showBlueBall()">重新建立藍球</button>
+      <button onclick="hideBlueBall()">隱藏藍球</button>
+    </div>
+  </div>
+
+  <a-scene
+    embedded
+    vr-mode-ui="enabled: false"
+    renderer="antialias: true; alpha: true"
+    arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
+  >
+
+    <!-- 不使用 gps-camera，先用一般 camera 測 3D 疊圖 -->
+    <a-camera id="camera" position="0 0 0"></a-camera>
+
+    <!-- 直接寫死一顆藍球在鏡頭前方，不用 JS 動態建立 -->
+    <a-sphere
+      id="blueBall"
+      position="0 0 -4"
+      radius="0.8"
+      color="#0057ff"
+      material="opacity: 1"
+    ></a-sphere>
+
+    <a-text
+      id="blueText"
+      value="前方藍球"
+      position="0 1.2 -4"
+      align="center"
+      color="#0057ff"
+      scale="1.4 1.4 1.4"
+    ></a-text>
+
+  </a-scene>
+
+  <script>
+    let collapsed = false;
+
+    function togglePanel() {
+      collapsed = !collapsed;
+      const panel = document.getElementById("panel");
+      const btn = document.getElementById("togglePanelBtn");
+
+      if (collapsed) {
+        panel.classList.add("collapsed");
+        btn.textContent = "▲";
+      } else {
+        panel.classList.remove("collapsed");
+        btn.textContent = "▼";
+      }
+    }
+
+    function showBlueBall() {
+      const ball = document.getElementById("blueBall");
+      const text = document.getElementById("blueText");
+
+      ball.setAttribute("visible", "true");
+      text.setAttribute("visible", "true");
+
+      document.getElementById("status").textContent = "已顯示藍球";
+    }
+
+    function hideBlueBall() {
+      const ball = document.getElementById("blueBall");
+      const text = document.getElementById("blueText");
+
+      ball.setAttribute("visible", "false");
+      text.setAttribute("visible", "false");
+
+      document.getElementById("status").textContent = "已隱藏藍球";
+    }
+
+    window.addEventListener("load", () => {
+      document.getElementById("status").textContent =
+        "已載入，理論上畫面中央應該看到藍球";
+
+      // 1.5 秒後自動收合面板，避免擋住相機畫面
+      setTimeout(() => {
+        if (!collapsed) {
+          togglePanel();
+        }
+      }, 1500);
+    });
+  </script>
+
+</body>
+</html>
